@@ -45,9 +45,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-
         # Customize the token payload here (if needed)
         # For example, you can add custom user fields to the token
-        # token['role'] = user.role
+        token['admin'] = user.is_superuser
 
         return token
