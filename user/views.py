@@ -8,7 +8,6 @@ from .permissions import IsAdminUser
 
 
 class CustomUserCreateView(generics.CreateAPIView):
-    # permission_classes = [IsAdminUser]
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
 
