@@ -9,12 +9,12 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password', 'date_joined', 'phone_number', 'user_type', 'created_at', 'updated_at']  # Include other fields if needed
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password', 'date_joined', 'phone_number',
+                  'user_type', 'created_at', 'updated_at']  # Include other fields if needed
         extra_kwargs = {
             'password': {'write_only': True},
             'username': {'required': False, 'read_only': True},  # Allow the username to be optional
             'email': {'required': True},  # Make sure the email is provided
-
 
         }
 
@@ -33,6 +33,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
             is_superuser=True,
             date_joined=validated_data['date_joined'],
             is_staff=True,
+            user_type=validated_data['user_type']
 
             # Include other fields if needed
         )
@@ -51,3 +52,9 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['admin'] = user.is_superuser
 
         return token
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+    confirm_new_password = serializers.CharField(required=True)
