@@ -43,6 +43,7 @@ class ChangePasswordView(APIView):
     def post(self, request):
         serializer = ChangePasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
         user = request.user
         old_password = serializer.validated_data['old_password']
         new_password = serializer.validated_data['new_password']
@@ -58,3 +59,4 @@ class ChangePasswordView(APIView):
         user.save()
 
         return Response({'message': 'Password successfully changed.'}, status=status.HTTP_200_OK)
+
