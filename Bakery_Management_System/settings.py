@@ -146,7 +146,7 @@ USE_TZ = True
 # Set the access token expiration time (in seconds)
 SECRET_KEY="qazwsxqazxsw"
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": False,
@@ -175,3 +175,14 @@ AUTH_USER_MODEL = 'user.CustomUser'
 # settings.py
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'your-email@gmail.com'
+EMAIL_HOST_PASSWORD = 'your-email-password'
+
+# AWS_STORAGE_BUCKET_NAME = 'your-bucket-name'
+# AWS_DEFAULT_ACL = 'public-read'
+# AWS_S3_REGION_NAME = 'your-region'

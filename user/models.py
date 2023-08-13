@@ -1,14 +1,11 @@
 from django.db import models
-from django.utils.timezone import now
 from django.contrib.auth.models import AbstractUser
-
+import re
+from django.forms import forms
 from franchise.models import Franchise
 
 
 class CustomUser(AbstractUser):
-    # Add any additional fields here if needed
-    # For example: phone_number = models.CharField(max_length=20, blank=True)
-    # No need to define username, email, or password, as they are already in AbstractUser
     franchise = models.ForeignKey(Franchise, on_delete=models.SET_NULL, null=True, blank=True)
     phone_number = models.CharField(max_length=20, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -17,8 +14,20 @@ class CustomUser(AbstractUser):
         ('admin', 'Admin'),
         ('franchise', 'Franchise'),
     )
-    user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES,default='franchise')
+    user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default='franchise')
 
+    def clean_phone_number(self):
+        phone_number = self.cleaned_data.get('phone_number')
+        if phone_number:
+            # Remove any non-digit characters from the phone number
+            cleaned_phone_number = re.sub(r'\D', '', phone_number)
+
+            # Perform additional validation based on your requirements
+            if len(cleaned_phone_number) < 10:
+                raise forms.ValidationError("Invalid phone number. It must have at least 10 digits.")
+
+            # Return the cleaned phone number
+            return cleaned_phone_number
 
 
 def __str__(self):
