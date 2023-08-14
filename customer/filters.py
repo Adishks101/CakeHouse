@@ -7,6 +7,6 @@ class CustomerFilter(django_filters.FilterSet):
         model = Customer
         fields = {
             'name': ['exact', 'icontains'],
-            'email': ['exact','icontains'],
+            'email': ['exact', 'icontains'],
             'phone_number': ['exact', 'icontains'],
         }
