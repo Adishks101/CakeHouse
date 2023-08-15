@@ -4,7 +4,7 @@ from rest_framework.mixins import ListModelMixin, UpdateModelMixin
 
 from user.permissions import IsAdminUser
 from .models import Inventory
-from .serializers import InventorySerializer, UpdateInventoryQuantitySerializer
+from .serializers import InventorySerializer, UpdateInventoryQuantitySerializer, RetrieveInventorySerializer
 
 
 class InventoryCreateView(generics.CreateAPIView):
@@ -14,7 +14,7 @@ class InventoryCreateView(generics.CreateAPIView):
 
 class InventoryListView(generics.ListAPIView):
     queryset = Inventory.objects.all()
-    serializer_class = InventorySerializer
+    serializer_class = RetrieveInventorySerializer
 
     def get_queryset(self):
         user = self.request.user
@@ -24,10 +24,17 @@ class InventoryListView(generics.ListAPIView):
             return Inventory.objects.filter(franchise=user.franchise)
 
 
+class InventoryListViewByFranchise(generics.ListAPIView):
+    serializer_class = RetrieveInventorySerializer
+
+    def get_queryset(self):
+        franchise_id = self.kwargs['franchise']  # Retrieve the franchise_id path variable
+        return Inventory.objects.filter(franchise=franchise_id)
+
 
 class InventoryDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Inventory.objects.all()
-    serializer_class = InventorySerializer
+    serializer_class = RetrieveInventorySerializer
 
     def get_queryset(self):
         return self.queryset.filter(franchise=self.request.user.franchise)
