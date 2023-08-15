@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'customer',
     'sales',
     'franchise',
-    'drf_yasg'
+    'drf_yasg',
+    'django_filters'
 ]
 
 MIDDLEWARE = [
