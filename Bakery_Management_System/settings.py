@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-(!+zpoe#pq0v3bjo36tv@fxq-%9#58(vyp2^65j%7-x_(vl-@$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -59,14 +59,15 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware'
+    'django.middleware.common.CommonMiddleware',
+    'Bakery_Management_System.custom_middleware_response.ResponseStatusMiddleware',
 
 ]
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
+    'PAGE_SIZE': 20,
     # 'DEFAULT_PERMISSION_CLASSES': [
     #     'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     # ]
@@ -74,9 +75,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Replace this with your frontend URL
-]
+CORS_ALLOW_ALL_ORIGINS = True
 ROOT_URLCONF = 'Bakery_Management_System.urls'
 
 TEMPLATES = [
@@ -96,10 +95,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'Bakery_Management_System.wsgi.application'
-
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
 
 DATABASES = {
     'default': {
@@ -142,16 +137,15 @@ USE_I18N = True
 USE_TZ = True
 
 # Set the access token expiration time (in seconds)
-SECRET_KEY = "qazwsxqazxsw"
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
-    "ROTATE_REFRESH_TOKENS": False,
-    "BLACKLIST_AFTER_ROTATION": False,
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(config('ACCESS_TOKEN_LIFETIME'))),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=int(config('REFRESH_TOKEN_LIFETIME'))),
+    "ROTATE_REFRESH_TOKENS": config('ROTATE_REFRESH_TOKENS'),
+    "BLACKLIST_AFTER_ROTATION": config('BLACKLIST_AFTER_ROTATION'),
     "UPDATE_LAST_LOGIN": True,
     "ALGORITHM": "HS256",
-    "SIGNING_KEY": settings.SECRET_KEY,
-    "ISSUER": "Bakery",
+    "SIGNING_KEY": config('SECRET_KEY'),
+    "ISSUER": config('ISSUER'),
     "AUTH_HEADER_TYPES": ("Bearer",),
     "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
     "USER_ID_FIELD": "id",
@@ -174,12 +168,12 @@ AUTH_USER_MODEL = 'user.CustomUser'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'your-email@gmail.com'
-EMAIL_HOST_PASSWORD = 'your-email-password'
+EMAIL_BACKEND = config('EMAIL_BACKEND')
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
 # AWS_STORAGE_BUCKET_NAME = 'your-bucket-name'
 # AWS_DEFAULT_ACL = 'public-read'
