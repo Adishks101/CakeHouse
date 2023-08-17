@@ -1,18 +1,21 @@
+from Bakery_Management_System.custom_mixin_response import CustomResponseMixin
 from rest_framework import generics
 from rest_framework.generics import UpdateAPIView
 from rest_framework.mixins import ListModelMixin, UpdateModelMixin
 
-from user.permissions import IsAdminUser
+from user.permissions import IsAdminUser, IsFranchiseOwner
 from .models import Inventory
 from .serializers import InventorySerializer, UpdateInventoryQuantitySerializer, RetrieveInventorySerializer
 
 
-class InventoryCreateView(generics.CreateAPIView):
+class InventoryCreateView(CustomResponseMixin,generics.CreateAPIView):
+    permission_classes = [IsAdminUser]
     queryset = Inventory.objects.all()
     serializer_class = InventorySerializer
 
 
-class InventoryListView(generics.ListAPIView):
+class InventoryListView(CustomResponseMixin,generics.ListAPIView):
+    permission_classes = [IsFranchiseOwner,IsAdminUser]
     queryset = Inventory.objects.all()
     serializer_class = RetrieveInventorySerializer
 
@@ -24,7 +27,8 @@ class InventoryListView(generics.ListAPIView):
             return Inventory.objects.filter(franchise=user.franchise)
 
 
-class InventoryListViewByFranchise(generics.ListAPIView):
+class InventoryListViewByFranchise(CustomResponseMixin,generics.ListAPIView):
+    permission_classes = [IsFranchiseOwner,IsAdminUser]
     serializer_class = RetrieveInventorySerializer
 
     def get_queryset(self):
@@ -32,7 +36,8 @@ class InventoryListViewByFranchise(generics.ListAPIView):
         return Inventory.objects.filter(franchise=franchise_id)
 
 
-class InventoryDetailView(generics.RetrieveUpdateDestroyAPIView):
+class InventoryDetailView(CustomResponseMixin,generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsFranchiseOwner,IsAdminUser]
     queryset = Inventory.objects.all()
     serializer_class = RetrieveInventorySerializer
 
@@ -43,7 +48,8 @@ class InventoryDetailView(generics.RetrieveUpdateDestroyAPIView):
         return self.retrieve(request, *args, **kwargs)
 
 
-class UpdateInventoryQuantityView(UpdateAPIView):
+class UpdateInventoryQuantityView(CustomResponseMixin,UpdateAPIView):
+    permission_classes = [IsAdminUser]
     queryset = Inventory.objects.all()
     serializer_class = UpdateInventoryQuantitySerializer
     permission_classes = [IsAdminUser]

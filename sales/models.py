@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from customer.models import Customer
 
 from franchise.models import Franchise
 from product.models import Product
@@ -10,6 +11,7 @@ User = get_user_model()
 class Sales(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    customer=models.ForeignKey(Customer,on_delete=models.CASCADE)
     franchise = models.ForeignKey(Franchise, on_delete=models.CASCADE)
     QUANTITY_TYPE_CHOICES = (
         ('piece', 'Piece'),

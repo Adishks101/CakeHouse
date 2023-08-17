@@ -4,6 +4,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode
+from Bakery_Management_System.custom_mixin_response import CustomResponseMixin
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status, filters
 from rest_framework.views import APIView
@@ -14,14 +15,29 @@ from .serializers import CustomUserSerializer, CustomTokenObtainPairSerializer, 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .permissions import IsAdminUser, IsUser
 from django.utils.encoding import force_bytes
+from rest_framework.pagination import PageNumberPagination
+from django.contrib.auth.hashers import check_password
 
-
-class CustomUserCreateView(generics.CreateAPIView):
+class NoPagination(PageNumberPagination):
+    page_size = None
+class CustomUserCreateView(CustomResponseMixin,generics.CreateAPIView):
+    permission_classes = [IsAdminUser]
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
 
+    def create(self, request, *args, **kwargs):
+        email = request.data.get('email')
+        phone_number=request.data.get('phone_number')
+        if CustomUser.objects.filter(email=email).exists():
+            return Response({'error': 'User with this email already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+        if CustomUser.objects.filter(phone_number=phone_number).exists():
+             return Response({'error': 'User with this Phone number already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return super().create(request, *args, **kwargs)
 
-class CustomUserListView(generics.ListAPIView):
+
+class CustomUserListView(CustomResponseMixin,generics.ListAPIView):
+    pagination_class = NoPagination
     permission_classes = [IsAdminUser]
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
@@ -31,7 +47,7 @@ class CustomUserListView(generics.ListAPIView):
     ordering_fields = ['first_name', 'created_at']
 
 
-class CustomUserDetailView(generics.RetrieveAPIView):
+class CustomUserDetailView(CustomResponseMixin,generics.RetrieveAPIView):
     permission_classes = [IsAdminUser]
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
@@ -40,7 +56,7 @@ class CustomUserDetailView(generics.RetrieveAPIView):
     # user/views.py
 
 
-class CustomTokenObtainPairView(TokenObtainPairView):
+class CustomTokenObtainPairView(CustomResponseMixin,TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
 
@@ -50,6 +66,7 @@ class MyTokenRefreshView(TokenRefreshView):
 
 class ChangePasswordView(APIView):
     permission_classes = [IsUser]
+    serializer_class = ChangePasswordSerializer
 
     def post(self, request):
         serializer = ChangePasswordSerializer(data=request.data)
@@ -59,8 +76,8 @@ class ChangePasswordView(APIView):
         old_password = serializer.validated_data['old_password']
         new_password = serializer.validated_data['new_password']
         confirm_new_password = serializer.validated_data['confirm_new_password']
-
-        if not user.check_password(old_password):
+        print(user.password)
+        if not check_password(old_password, user.password):
             return Response({'error': 'Old password is incorrect.'}, status=status.HTTP_400_BAD_REQUEST)
 
         if new_password != confirm_new_password:
@@ -78,9 +95,9 @@ class ForgotPasswordView(APIView):
         try:
             user = User.objects.get(email=email)
             send_password_reset_email(user)
-            return Response({'message': 'Password reset email sent.'})
+            return Response({'message': 'Password reset email sent.','status':1})
         except User.DoesNotExist:
-            return Response({'error': 'User not found.'}, status=400)
+            return Response({'error': 'User not found.','status':0}, status=400)
 
 
 def send_password_reset_email(user):
@@ -96,3 +113,4 @@ def send_password_reset_email(user):
     from_email = "your-email@example.com"
     recipient_list = [user.email]
     send_mail(subject, message, from_email, recipient_list)
+
