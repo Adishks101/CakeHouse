@@ -1,9 +1,10 @@
 # views.py
 from django.contrib.auth import get_user_model
+from Bakery_Management_System.custom_mixin_response import CustomResponseMixin
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
 
-from user.permissions import IsAdminUser
+from user.permissions import IsAdminUser, IsFranchiseOwner
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from .filters import FranchiseFilter
@@ -13,7 +14,8 @@ from .serializers import FranchiseSerializer, FranchiseUpdateSerializer
 CustomUser = get_user_model()
 
 
-class FranchiseListView(generics.ListAPIView):
+class FranchiseListView(CustomResponseMixin,generics.ListAPIView):
+    permission_classes = [IsAdminUser]
     queryset = Franchise.objects.all()
     serializer_class = FranchiseSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -22,9 +24,9 @@ class FranchiseListView(generics.ListAPIView):
     ordering_fields = ['name']
 
 
-class FranchiseCreateView(generics.CreateAPIView):
+class FranchiseCreateView(CustomResponseMixin,generics.CreateAPIView):
     # permission_classes = [IsAdminUser]
-
+    permission_classes = [IsAdminUser]
     serializer_class = FranchiseSerializer
 
     def perform_create(self, serializer):
@@ -42,8 +44,8 @@ class FranchiseCreateView(generics.CreateAPIView):
         user.save()
 
 
-class FranchiseDetailView(generics.RetrieveUpdateDestroyAPIView):
-    # permission_classes = [IsAdminUser,IsFranchiseOwner]
+class FranchiseDetailView(CustomResponseMixin,generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminUser,IsFranchiseOwner]
     queryset = Franchise.objects.all()
     serializer_class = FranchiseUpdateSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
