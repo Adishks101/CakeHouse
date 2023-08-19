@@ -60,7 +60,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'Bakery_Management_System.custom_middleware_response.ResponseStatusMiddleware',
 
 ]
 REST_FRAMEWORK = {

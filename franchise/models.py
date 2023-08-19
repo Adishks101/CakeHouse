@@ -12,7 +12,7 @@ class Franchise(models.Model):
     username = models.EmailField()
     contact_email = models.EmailField()
     pin = models.CharField(max_length=6)
-    phone_number = models.CharField(max_length=20)
+    phone_number = models.CharField(max_length=20, unique=True)
     date_established = models.DateField()
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -40,6 +40,7 @@ class Franchise(models.Model):
 
             # Return the cleaned phone number
             return cleaned_phone_number
+
     def save(self, *args, **kwargs):
         # Hash the password before saving to the database
         if self.password:

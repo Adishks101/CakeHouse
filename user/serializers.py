@@ -13,8 +13,8 @@ class CustomUserSerializer(serializers.ModelSerializer):
                   'user_type', 'created_at', 'updated_at']  # Include other fields if needed
         extra_kwargs = {
             'password': {'write_only': True},
-            'first_name':{'write_only':True},
-            'last_name':{'write_only':True},
+            'first_name': {'write_only': True},
+            'last_name': {'write_only': True},
             'email': {'required': True},  # Make sure the email is provided
 
         }
@@ -22,7 +22,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Set the username the same as the email
         username = validated_data['email'].strip()
-        name=validated_data['first_name'].strip()+" "+validated_data['last_name'].strip()
+        name = validated_data['first_name'].strip() + " " + validated_data['last_name'].strip()
         validated_data['username'] = username
         # Create the user
         user = CustomUser.objects.create_user(
@@ -42,6 +42,16 @@ class CustomUserSerializer(serializers.ModelSerializer):
         )
         return user
 
+    def validate_email(self, value):
+        if CustomUser.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Email already exists")
+        return value
+
+    def validate_phone_number(self, value):
+        if CustomUser.objects.filter(phone_number=value).exists():
+            raise serializers.ValidationError("Phone number already exists")
+        return value
+
 
 # user/serializers.py
 
@@ -50,7 +60,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-        token['admin']=user.user_type == 'admin'
+        token['admin'] = user.user_type == 'admin'
         return token
 
 
