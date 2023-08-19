@@ -5,10 +5,10 @@ from django import forms
 
 class Customer(models.Model):
     name = models.CharField(max_length=255, blank=True)
-    email = models.EmailField(blank=True,unique=True)
-    phone_number = models.CharField(max_length=20, blank=False,unique=True)
+    email = models.EmailField(blank=True, unique=True)
+    phone_number = models.CharField(max_length=20, blank=False, unique=True)
     pin = models.CharField(max_length=6, blank=True)
-    points = models.PositiveIntegerField( default=0)
+    points = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

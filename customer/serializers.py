@@ -9,7 +9,12 @@ class CustomerSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
         extra_kwargs = {
-            'email': {'required': True},  # Make sure the email is provided
+            'phone_number': {'required': True},  # Make sure the email is provided
             'points': {'read_only': True}
 
         }
+
+    def validate_phone_number(self, value):
+        if Customer.objects.filter(phone_number=value).exists():
+            raise serializers.ValidationError("Phone number already exists")
+        return value
