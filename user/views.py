@@ -9,6 +9,12 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status, filters
 from rest_framework.views import APIView
 from rest_framework.response import Response
+
+from customer.models import Customer
+from franchise.models import Franchise
+from inventory.models import Inventory
+from product.models import Product
+from sales.models import Sales
 from .filters import CustomerFilter
 from .models import CustomUser
 from .serializers import CustomUserSerializer, CustomTokenObtainPairSerializer, ChangePasswordSerializer
@@ -117,3 +123,35 @@ def send_password_reset_email(user):
     from_email = "your-email@example.com"
     recipient_list = [user.email]
     send_mail(subject, message, from_email, recipient_list)
+
+
+class TotalCountsView(APIView):
+    permission_classes = [IsUser]
+
+    def get(self, request):
+        if self.request.user.user_type == 'admin':
+            user_count = CustomUser.objects.count()
+            franchise_count = Franchise.objects.count()
+            sales_count = Sales.objects.count()
+            customer_count = Customer.objects.count()
+            product_count = Product.objects.count()
+            response_data = {
+                "user_count": user_count,
+                "franchise_count": franchise_count,
+                "sales_count": sales_count,
+                "customer_count": customer_count,
+                "product_count": product_count,
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+        elif self.request.user.user_type == 'franchise':
+            sales_count = Sales.objects.filter(franchise=self.request.user.franchise).count()
+            customer_count = Customer.objects.count()
+            product_count = Inventory.objects.filter(franchise=self.request.user.franchise).count()
+            response_data = {
+                "sales_count": sales_count,
+                "customer_count": customer_count,
+                "product_count": product_count,
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+        else:
+            return Response({"message": "Invalid access"}, status=status.HTTP_403_FORBIDDEN)

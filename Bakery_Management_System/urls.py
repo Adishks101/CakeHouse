@@ -23,6 +23,8 @@ from drf_yasg import openapi
 from django.conf import settings
 from django.conf.urls.static import static
 
+from user.views import TotalCountsView
+
 schema_view = get_schema_view(
     openapi.Info(
         title="Your API",
@@ -46,6 +48,7 @@ urlpatterns = [
     path('api/sales/', include('sales.urls')),
     path('api/customer/', include('customer.urls')),
     path('api/inventory/', include('inventory.urls')),
+    path('api/dashboard/', TotalCountsView.as_view(), name='dashboard-count-api'),
 
 ]
 if settings.DEBUG:
