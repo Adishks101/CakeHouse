@@ -1,14 +1,11 @@
 # serializers.py
 from rest_framework import serializers
-
 from franchise.serializers import FranchiseSerializer
 from product.serializers import ProductSerializer
 from .models import Inventory
 
 
 class InventorySerializer(serializers.ModelSerializer):
-    franchise = FranchiseSerializer()
-    product = ProductSerializer()
 
     class Meta:
         model = Inventory
@@ -25,7 +22,7 @@ class UpdateInventoryQuantitySerializer(serializers.Serializer):
 
 class RetrieveInventorySerializer(serializers.ModelSerializer):
     product = ProductSerializer()
-
+    franchise = FranchiseSerializer()
     class Meta:
         model = Inventory
         fields = '__all__'
