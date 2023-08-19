@@ -1,15 +1,25 @@
 from Bakery_Management_System.custom_mixin_response import CustomResponseMixin
-from rest_framework import generics
+from rest_framework import generics, serializers
 from rest_framework.generics import UpdateAPIView
 from user.permissions import IsAdminUser, IsUser
 from .models import Inventory
 from .serializers import InventorySerializer, UpdateInventoryQuantitySerializer, RetrieveInventorySerializer
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class InventoryCreateView(CustomResponseMixin, generics.CreateAPIView):
     permission_classes = [IsAdminUser]
     queryset = Inventory.objects.all()
     serializer_class = InventorySerializer
+
+    def perform_create(self, serializer):
+        try:
+            inventory = Inventory.objects.get(product=serializer.validated_data['product'],
+                                              franchise=serializer.validated_data['franchise'])
+            raise serializers.ValidationError({"message": "Product already exists in inventory.", "status": 0})
+        except Inventory.DoesNotExist:
+            pass
+        serializer.save()
 
 
 class InventoryListView(CustomResponseMixin, generics.ListAPIView):
