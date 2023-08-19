@@ -9,7 +9,7 @@ class CustomerSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
         extra_kwargs = {
-            'email': {'required': True},  # Make sure the email is provided
+            'phone_number': {'required': True},  # Make sure the email is provided
             'points': {'read_only': True}
 
         }

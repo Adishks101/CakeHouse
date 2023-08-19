@@ -18,7 +18,6 @@ class SalesSerializer(serializers.ModelSerializer):
 
 
 class SalesCreateSerializer(serializers.Serializer):
-
     name = serializers.CharField(max_length=255, required=False)
     phone_no = serializers.CharField(max_length=20, required=True)
 
@@ -31,17 +30,17 @@ class SalesCreateSerializer(serializers.Serializer):
     def create(self, validated_data):
         name = validated_data.pop('name')
         phone_number = validated_data.pop('phone_number')
-        
+
         # Check if a customer with the given phone number already exists
         try:
             customer = Customer.objects.get(phone_number=phone_number)
         except Customer.DoesNotExist:
             # Customer does not exist, create a new one
-            customer = Customer.objects.create(name=name ,phone_number=phone_number)
-        
+            customer = Customer.objects.create(name=name, phone_number=phone_number)
+
         validated_data['user'] = self.context['request'].user
         validated_data['customer'] = customer
-        
+
         sales = Sales.objects.create(**validated_data)
-        
+
         return sales
