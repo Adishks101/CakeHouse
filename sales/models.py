@@ -11,7 +11,7 @@ User = get_user_model()
 class Sales(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    customer=models.ForeignKey(Customer,on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     franchise = models.ForeignKey(Franchise, on_delete=models.CASCADE)
     QUANTITY_TYPE_CHOICES = (
         ('piece', 'Piece'),
@@ -23,7 +23,7 @@ class Sales(models.Model):
         ('cash', 'Cash'),
         ('bank', 'Bank'),
     )
-    payment_mode=models.CharField(max_length=4,choices=PAYMENT_MODE,default='cash')
+    payment_mode = models.CharField(max_length=4, choices=PAYMENT_MODE, default='cash')
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     sale_date = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)

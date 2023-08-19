@@ -2,15 +2,23 @@
 from customer.models import Customer
 from rest_framework import serializers
 
+from customer.serializers import CustomerSerializer
 from product.models import Product
+from product.serializers import ProductSerializer
+from user.serializers import CustomUserSerializer
 from .models import Sales
 
 
 class SalesSerializer(serializers.ModelSerializer):
+    product = ProductSerializer()
+    user = CustomUserSerializer()
+    customer = CustomerSerializer()
+
     class Meta:
         model = Sales
         fields = (
-            'product', 'quantity_sold', 'quantity_type', 'payment_mode', 'total_amount', 'sale_date', 'created_at',
+            'product', 'customer', 'user', 'quantity_sold', 'quantity_type', 'payment_mode', 'total_amount',
+            'sale_date', 'created_at',
             'updated_at')
 
     def create(self, validated_data):
