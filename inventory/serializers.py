@@ -7,6 +7,9 @@ from .models import Inventory
 
 
 class InventorySerializer(serializers.ModelSerializer):
+    franchise = FranchiseSerializer()
+    product = ProductSerializer()
+
     class Meta:
         model = Inventory
         fields = ('id', 'franchise', 'product', 'available_quantity', 'total_sold', 'created_at', 'updated_at')

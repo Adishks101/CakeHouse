@@ -1,5 +1,6 @@
 # user/serializers.py
 from datetime import datetime
+from franchise.serializers import FranchiseSerializer
 
 from rest_framework import serializers
 from .models import CustomUser
@@ -7,15 +8,17 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
+    franchise=FranchiseSerializer()
     class Meta:
         model = CustomUser
         fields = ['id', 'first_name', 'last_name', 'email', 'password', 'date_joined', 'phone_number',
-                  'user_type', 'created_at', 'updated_at']  # Include other fields if needed
+                  'user_type', 'created_at', 'updated_at','franchise']  # Include other fields if needed
         extra_kwargs = {
             'password': {'write_only': True},
             'first_name': {'write_only': True},
             'last_name': {'write_only': True},
-            'email': {'required': True},  # Make sure the email is provided
+            'email': {'required': True},
+            'franchise':{'read_only':True}
 
         }
 
