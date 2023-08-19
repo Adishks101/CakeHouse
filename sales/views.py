@@ -1,7 +1,6 @@
 from Bakery_Management_System.custom_mixin_response import CustomResponseMixin
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status, filters
-from rest_framework.response import Response
 from inventory.models import Inventory
 from user.permissions import IsAdminUser, IsFranchiseOwner, IsFranchiseUser, IsUser
 from . import serializers
@@ -10,8 +9,8 @@ from .models import Sales
 from .serializers import SalesCreateSerializer, SalesSerializer
 
 
-class SalesListView(CustomResponseMixin,generics.ListAPIView):
-    permission_classes = [IsFranchiseOwner,IsAdminUser]
+class SalesListView(CustomResponseMixin, generics.ListAPIView):
+    permission_classes = [IsFranchiseOwner]
     serializer_class = SalesSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = SalesFilter
@@ -19,18 +18,37 @@ class SalesListView(CustomResponseMixin,generics.ListAPIView):
     ordering_fields = ['price', 'created_at']
 
     def get_queryset(self):
-        return Sales.objects.filter(franchise=self.request.user.franchise)
+        user_type = self.request.user.user_type
+        if user_type == 'admin':
+            # Return the queryset for admin users
+            return Sales.objects.all()
+        elif user_type == 'franchise':
+            # Return the queryset for franchise users
+            return Sales.objects.filter(franchise=self.request.user.franchise)
+        else:
+            # Return an empty queryset or raise an error based on your requirement
+            return Inventory.objects.none()
 
 
-class SalesDetailView(CustomResponseMixin,generics.RetrieveAPIView):
-    permission_classes = [IsFranchiseOwner,IsAdminUser]
+class SalesDetailView(CustomResponseMixin, generics.RetrieveAPIView):
+    permission_classes = [IsUser]
     serializer_class = SalesSerializer
 
     def get_queryset(self):
-        return Sales.objects.filter(franchise=self.request.user.franchise)
+        user_type = self.request.user.user_type
+        franchise_id = self.kwargs['franchise']
+        if user_type == 'admin':
+            # Return the queryset for admin users
+            return Sales.objects.filter(id=franchise_id)
+        elif user_type == 'franchise':
+            # Return the queryset for franchise users
+            return Sales.objects.filter(franchise=self.request.user.franchise, id=franchise_id)
+        else:
+            # Return an empty queryset or raise an error based on your requirement
+            return Inventory.objects.none()
 
 
-class SaleCreateView(CustomResponseMixin,generics.CreateAPIView):
+class SaleCreateView(CustomResponseMixin, generics.CreateAPIView):
     permission_classes = [IsFranchiseUser]
     queryset = Sales.objects.all()
     serializer_class = SalesCreateSerializer
