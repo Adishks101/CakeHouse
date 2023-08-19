@@ -31,10 +31,11 @@ class SalesCreateSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255, required=False)
     phone_no = serializers.CharField(max_length=20, required=True)
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=True)
-    quantity_sold = serializers.IntegerField( required=True)
+    quantity_sold = serializers.IntegerField(required=True)
     quantity_type = serializers.ChoiceField(choices=QUANTITY_TYPE_CHOICES, required=True)
     payment_mode = serializers.ChoiceField(choices=PAYMENT_MODE_CHOICES, required=True)
-    total_amount = serializers.IntegerField( required=True)
+    total_amount = serializers.IntegerField(required=True)
+
     def create(self, validated_data):
         name = validated_data.pop('name')
         phone_number = validated_data.pop('phone_number')
