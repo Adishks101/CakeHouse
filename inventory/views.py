@@ -63,7 +63,7 @@ class InventoryListViewByFranchise(CustomResponseMixin, generics.ListAPIView):
             return Inventory.objects.none()
 
 
-class InventoryDetailView(CustomResponseMixin, generics.RetrieveUpdateDestroyAPIView):
+class InventoryDetailView(CustomResponseMixin, generics.RetrieveDestroyAPIView):
     permission_classes = [IsUser]
     serializer_class = RetrieveInventorySerializer
 
@@ -79,14 +79,11 @@ class InventoryDetailView(CustomResponseMixin, generics.RetrieveUpdateDestroyAPI
             # Return an empty queryset or raise an error based on your requirement
             return Inventory.objects.none()
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
 
 class UpdateInventoryQuantityView(CustomResponseMixin, UpdateAPIView):
     permission_classes = [IsAdminUser]
     queryset = Inventory.objects.all()
-    serializer_class = UpdateInventoryQuantitySerializer
+    serializer_class = InventorySerializer
 
     def perform_update(self, serializer):
         inventory_item = self.get_object()
