@@ -92,7 +92,8 @@ class ChangePasswordView(APIView):
 
         if new_password != confirm_new_password:
             return Response({'error': 'New passwords do not match.'}, status=status.HTTP_400_BAD_REQUEST)
-
+        if len(new_password.strip()) < 8:
+            return Response({'error': 'Password must be minimum 8 character long.'}, status=status.HTTP_400_BAD_REQUEST)
         user.set_password(new_password)
         user.save()
 
@@ -155,3 +156,11 @@ class TotalCountsView(APIView):
             return Response(response_data, status=status.HTTP_200_OK)
         else:
             return Response({"message": "Invalid access"}, status=status.HTTP_403_FORBIDDEN)
+
+
+class CurrentUserView(CustomResponseMixin, generics.RetrieveAPIView):
+    permission_classes = [IsUser]
+    serializer_class = CustomUserSerializer
+
+    def get_queryset(self):
+        return CustomUser.objects.get(id=self.request.user.id)

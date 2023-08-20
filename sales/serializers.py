@@ -33,8 +33,8 @@ class SalesCreateSerializer(serializers.Serializer):
         ('bank', 'Bank'),
     )
     QUANTITY_TYPE_CHOICES = (
-        ('cash', 'Cash'),
-        ('bank', 'Bank'),
+        ('weight', 'Weight'),
+        ('piece', 'Piece'),
     )
     name = serializers.CharField(max_length=255, required=False)
     phone_no = serializers.CharField(max_length=20, required=True)
