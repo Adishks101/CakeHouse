@@ -1,5 +1,7 @@
 # views.py
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ObjectDoesNotExist
+
 from Bakery_Management_System.custom_mixin_response import CustomResponseMixin
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
@@ -41,6 +43,14 @@ class FranchiseCreateView(CustomResponseMixin, generics.CreateAPIView):
             password=franchise.password
         )
         user.save()
+
+
+class FranchiseSelfView(CustomResponseMixin, generics.RetrieveAPIView):
+    permission_classes = [IsFranchiseOwner]
+    serializer_class = FranchiseUpdateSerializer
+
+    def get_queryset(self):
+        return Franchise.objects.all(id=self.request.user.franchise)
 
 
 class FranchiseDetailView(CustomResponseMixin, generics.RetrieveUpdateDestroyAPIView):
