@@ -59,7 +59,7 @@ class FranchiseDetailView(CustomResponseMixin, generics.RetrieveUpdateDestroyAPI
 
     def get_queryset(self):
         user_type = self.request.user.user_type
-        franchise_id = self.kwargs['franchise']
+        franchise_id = self.kwargs['pk']
         if user_type == 'admin':
             # Return the queryset for admin users
             return Franchise.objects.all()
