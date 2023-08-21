@@ -45,6 +45,8 @@ class FranchiseCreateView(CustomResponseMixin, generics.CreateAPIView):
         user.save()
 
 
+
+
 class FranchiseSelfView(CustomResponseMixin, generics.RetrieveAPIView):
     permission_classes = [IsFranchiseOwner]
     serializer_class = FranchiseUpdateSerializer
