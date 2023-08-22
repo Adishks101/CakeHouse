@@ -6,13 +6,13 @@ from .models import Inventory
 
 
 class InventorySerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Inventory
         fields = ('id', 'franchise', 'product', 'available_quantity', 'total_sold', 'created_at', 'updated_at')
         extra_kwargs = {
 
-            'total_sold': {'read_only': True}
+            'total_sold': {'read_only': True},
+            'id': {'read_only': True}
         }
 
 
@@ -23,6 +23,7 @@ class UpdateInventoryQuantitySerializer(serializers.Serializer):
 class RetrieveInventorySerializer(serializers.ModelSerializer):
     product = ProductSerializer()
     franchise = FranchiseSerializer()
+
     class Meta:
         model = Inventory
         fields = '__all__'

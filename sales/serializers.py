@@ -16,10 +16,10 @@ class SalesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Sales
-        fields = (
-            'product', 'customer', 'user', 'quantity_sold', 'quantity_type', 'payment_mode', 'total_amount',
-            'sale_date', 'created_at',
-            'updated_at')
+        fields = ('id',
+                  'product', 'customer', 'user', 'quantity_sold', 'quantity_type', 'payment_mode', 'total_amount',
+                  'sale_date', 'created_at',
+                  'updated_at')
 
     def create(self, validated_data):
         # Set the franchise (user) based on the authenticated user
@@ -36,6 +36,7 @@ class SalesCreateSerializer(serializers.Serializer):
         ('weight', 'Weight'),
         ('piece', 'Piece'),
     )
+    id = serializers.IntegerField(required=False)
     name = serializers.CharField(max_length=255, required=False)
     phone_number = serializers.CharField(max_length=20, required=True)
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=True)
@@ -43,7 +44,10 @@ class SalesCreateSerializer(serializers.Serializer):
     quantity_type = serializers.ChoiceField(choices=QUANTITY_TYPE_CHOICES, required=True)
     payment_mode = serializers.ChoiceField(choices=PAYMENT_MODE_CHOICES, required=True)
     total_amount = serializers.IntegerField(required=True)
+    extra_kwargs = {
 
+        'id': {'read_only': True}
+    }
     def create(self, validated_data):
         name = validated_data.pop('name')
         phone_number = validated_data.pop('phone_number')
