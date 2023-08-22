@@ -1,3 +1,4 @@
+from rest_framework.response import Response
 
 from Bakery_Management_System.custom_mixin_response import CustomResponseMixin
 from django_filters.rest_framework import DjangoFilterBackend
@@ -60,8 +61,17 @@ class SaleCreateView(CustomResponseMixin, generics.CreateAPIView):
             inventory = Inventory.objects.get(product=serializer.validated_data['product'],
                                               franchise=self.request.user.franchise)
         except Inventory.DoesNotExist:
-            raise serializers.ValidationError("Product not found in inventory.")
+            raise serializers.ValidationError({"message":"Product not found in inventory."})
         if inventory.available_quantity < serializer.validated_data['quantity_sold']:
-            raise serializers.ValidationError("Insufficient inventory.")
-        serializer.save(franchise=self.request.user.franchise)
+            raise serializers.ValidationError({"message": "Insufficient inventory."})
+        sales = serializer.save(franchise=self.request.user.franchise)
         inventory.update_available_quantity(serializer.validated_data['quantity_sold'])
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        self.perform_create(serializer)
+
+        sale_serializer = SalesSerializer(serializer.instance)
+        return Response(data=sale_serializer.data, status=status.HTTP_201_CREATED)

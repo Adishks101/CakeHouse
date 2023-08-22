@@ -1,5 +1,7 @@
+from rest_framework.response import Response
+
 from Bakery_Management_System.custom_mixin_response import CustomResponseMixin
-from rest_framework import generics, serializers
+from rest_framework import generics, serializers, status
 from rest_framework.generics import UpdateAPIView
 from user.permissions import IsAdminUser, IsUser
 from .models import Inventory
@@ -83,10 +85,16 @@ class InventoryDetailView(CustomResponseMixin, generics.RetrieveDestroyAPIView):
 class UpdateInventoryQuantityView(CustomResponseMixin, UpdateAPIView):
     permission_classes = [IsAdminUser]
     queryset = Inventory.objects.all()
-    serializer_class = InventorySerializer
+    serializer_class = UpdateInventoryQuantitySerializer
 
-    def perform_update(self, serializer):
-        inventory_item = self.get_object()
+    def update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            inventory_item = Inventory.objects.get(id=kwargs['pk'])
+        except Inventory.DoesNotExist:
+            raise serializers.ValidationError({"message": "Inventory does not exist."})
         new_quantity = serializer.validated_data['quantity']
-        inventory_item.available_quantity = new_quantity
+        inventory_item.available_quantity += new_quantity
         inventory_item.save()
+        return Response({'message': 'Quantity updated successfully'}, status=status.HTTP_200_OK)

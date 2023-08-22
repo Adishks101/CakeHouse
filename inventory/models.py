@@ -15,8 +15,8 @@ class Inventory(models.Model):
     def __str__(self):
         return f"Inventory for {self.product.name}"
 
-
     def update_available_quantity(self, quantity_sold):
         self.total_sold += quantity_sold
         self.available_quantity -= quantity_sold
+
         self.save()
