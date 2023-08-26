@@ -7,8 +7,8 @@ from franchise.models import Franchise
 
 class CustomUser(AbstractUser):
     franchise = models.ForeignKey(Franchise, on_delete=models.SET_NULL, null=True, blank=True)
-    name=models.CharField(max_length=255, blank=True,null=True)
-    phone_number = models.CharField(max_length=20, blank=True,unique=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    phone_number = models.CharField(max_length=20, blank=True, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     USER_TYPE_CHOICES = (

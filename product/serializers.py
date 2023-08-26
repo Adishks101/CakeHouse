@@ -12,7 +12,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'category': {'required': True},
             'name': {'required': True},
             'price': {'required': True},
-            'product_image': {'required': True},
+            'product_image': {'required': False},
             'company': {'required': True},
 
         }
