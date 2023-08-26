@@ -13,13 +13,14 @@ class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id', 'first_name', 'last_name', 'email', 'password', 'date_joined', 'phone_number',
-                  'user_type', 'created_at', 'updated_at', 'franchise']  # Include other fields if needed
+                  'user_type', 'created_at', 'updated_at', 'franchise', 'is_active']
         extra_kwargs = {
             'password': {'write_only': True},
             'first_name': {'write_only': True},
             'last_name': {'write_only': True},
             'email': {'required': True},
-            'franchise': {'read_only': True}
+            'franchise': {'read_only': True},
+            'is_active': {'required': False}
 
         }
 
@@ -70,5 +71,23 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)
-    new_password = serializers.CharField(required=True,allow_blank=False,allow_null=False)
-    confirm_new_password = serializers.CharField(required=True,allow_blank=False,allow_null=False)
+    new_password = serializers.CharField(required=True, allow_blank=False, allow_null=False)
+    confirm_new_password = serializers.CharField(required=True, allow_blank=False, allow_null=False)
+
+
+class AdminChangePasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    new_password = serializers.CharField(required=True, allow_blank=False, allow_null=False)
+    confirm_new_password = serializers.CharField(required=True, allow_blank=False, allow_null=False)
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'name', 'email', 'date_joined', 'phone_number', 'is_active']
+        extra_kwargs = {
+            'email': {'required': True},
+            'is_active': {'required': False}
+
+
+        }

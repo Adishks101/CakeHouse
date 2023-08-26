@@ -1,5 +1,4 @@
 # user/views.py
-from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
@@ -17,7 +16,8 @@ from product.models import Product
 from sales.models import Sales
 from .filters import CustomerFilter
 from .models import CustomUser
-from .serializers import CustomUserSerializer, CustomTokenObtainPairSerializer, ChangePasswordSerializer
+from .serializers import CustomUserSerializer, CustomTokenObtainPairSerializer, ChangePasswordSerializer, \
+    AdminChangePasswordSerializer, UserUpdateSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .permissions import IsAdminUser, IsUser
 from django.utils.encoding import force_bytes
@@ -61,6 +61,7 @@ class CustomUserDetailView(CustomResponseMixin, generics.RetrieveAPIView):
     permission_classes = [IsAdminUser]
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
+
     lookup_field = 'id'
 
     # user/views.py
@@ -74,19 +75,17 @@ class MyTokenRefreshView(TokenRefreshView):
     pass
 
 
-class ChangePasswordView(APIView):
+class ChangePasswordView(CustomResponseMixin, APIView):
     permission_classes = [IsUser]
     serializer_class = ChangePasswordSerializer
 
-    def post(self, request):
+    def put(self, request):
         serializer = ChangePasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         user = request.user
         old_password = serializer.validated_data['old_password']
         new_password = serializer.validated_data['new_password']
         confirm_new_password = serializer.validated_data['confirm_new_password']
-        print(user.password)
         if not check_password(old_password, user.password):
             return Response({'error': 'Old password is incorrect.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -100,14 +99,36 @@ class ChangePasswordView(APIView):
         return Response({'message': 'Password successfully changed.'}, status=status.HTTP_200_OK)
 
 
-class ForgotPasswordView(APIView):
+class AdminChangePasswordView(CustomResponseMixin, APIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = ChangePasswordSerializer
+
+    def put(self, request):
+        serializer = AdminChangePasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            user = CustomUser.objects.get(serializer.validated_data['email'])
+        except CustomUser.DoesNotExist:
+            return Response({"error": 'User not found'}, status=status.HTTP_400_BAD_REQUEST)
+        new_password = serializer.validated_data['new_password']
+        confirm_new_password = serializer.validated_data['confirm_new_password']
+        if new_password != confirm_new_password:
+            return Response({'error': 'New passwords do not match.'}, status=status.HTTP_400_BAD_REQUEST)
+        if len(new_password.strip()) < 8:
+            return Response({'error': 'Password must be minimum 8 character long.'}, status=status.HTTP_400_BAD_REQUEST)
+        user.set_password(new_password)
+        user.save()
+        return Response({'message': 'Password successfully changed.'}, status=status.HTTP_200_OK)
+
+
+class ForgotPasswordView(CustomResponseMixin, APIView):
     def post(self, request):
         email = request.data.get('email')
         try:
-            user = User.objects.get(email=email)
+            user = CustomUser.objects.get(email=email)
             send_password_reset_email(user)
             return Response({'message': 'Password reset email sent.', 'status': 1})
-        except User.DoesNotExist:
+        except CustomUser.DoesNotExist:
             return Response({'error': 'User not found.', 'status': 0}, status=400)
 
 
@@ -126,7 +147,7 @@ def send_password_reset_email(user):
     send_mail(subject, message, from_email, recipient_list)
 
 
-class TotalCountsView(APIView):
+class TotalCountsView(CustomResponseMixin, APIView):
     permission_classes = [IsUser]
 
     def get(self, request):
@@ -142,6 +163,7 @@ class TotalCountsView(APIView):
                 "sales_count": sales_count,
                 "customer_count": customer_count,
                 "product_count": product_count,
+
             }
             return Response(response_data, status=status.HTTP_200_OK)
         elif self.request.user.user_type == 'franchise':
@@ -164,3 +186,39 @@ class CurrentUserView(CustomResponseMixin, generics.RetrieveAPIView):
 
     def get_queryset(self):
         return CustomUser.objects.get(id=self.request.user.id)
+
+
+class CustomUserUpdateView(CustomResponseMixin, generics.RetrieveUpdateAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = UserUpdateSerializer
+    permission_classes = [IsAdminUser]
+
+    def get_object(self):
+        return self.request.user
+
+    def put(self, request, *args, **kwargs):
+        user_id = kwargs.get('pk')
+        try:
+            user = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return Response({'error': 'User does not exist.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = UserUpdateSerializer(user, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            email = serializer.validated_data.get('email')
+            phone_number = serializer.validated_data.get('phone_number')
+
+            if CustomUser.objects.filter(email=email).exclude(id=user_id).exists():
+                return Response({'error': 'User with this email already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+            if CustomUser.objects.filter(phone_number=phone_number).exclude(id=user_id).exists():
+                return Response({'error': 'User with this Phone number already exists.'},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            serializer.save(username=email)
+            return Response({'message': 'User details successfully updated.'}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
