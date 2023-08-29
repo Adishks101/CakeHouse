@@ -3,6 +3,7 @@ from customer.models import Customer
 from rest_framework import serializers
 
 from customer.serializers import CustomerSerializer
+from franchise.serializers import FranchiseSerializer
 from product.models import Product
 from product.serializers import ProductSerializer
 from user.serializers import CustomUserSerializer
@@ -13,11 +14,13 @@ class SalesSerializer(serializers.ModelSerializer):
     product = ProductSerializer()
     user = CustomUserSerializer()
     customer = CustomerSerializer()
+    franchise = FranchiseSerializer()
 
     class Meta:
         model = Sales
         fields = ('id',
-                  'product', 'customer', 'user', 'quantity_sold', 'quantity_type', 'payment_mode', 'total_amount',
+                  'product', 'customer', 'user', 'franchise', 'quantity_sold', 'quantity_type', 'payment_mode',
+                  'total_amount',
                   'sale_date', 'created_at',
                   'updated_at')
 
