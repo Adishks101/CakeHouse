@@ -48,6 +48,7 @@ class SalesCreateSerializer(serializers.Serializer):
 
         'id': {'read_only': True}
     }
+
     def create(self, validated_data):
         name = validated_data.pop('name')
         phone_number = validated_data.pop('phone_number')
@@ -58,7 +59,7 @@ class SalesCreateSerializer(serializers.Serializer):
         except Customer.DoesNotExist:
             # Customer does not exist, create a new one
             customer = Customer.objects.create(name=name, phone_number=phone_number)
-
+        customer.update_points(validated_data['total_amount'])
         validated_data['user'] = self.context['request'].user
         validated_data['customer'] = customer
 

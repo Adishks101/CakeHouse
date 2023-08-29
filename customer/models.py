@@ -35,6 +35,10 @@ class Customer(models.Model):
             # Return the cleaned phone number
             return cleaned_phone_number
 
+    def update_points(self, points):
+        self.points += points
+        self.save()
 
-def __str__(self):
-    return self.email
+
+    def __str__(self):
+        return self.phone_number
