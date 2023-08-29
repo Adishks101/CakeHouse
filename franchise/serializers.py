@@ -54,7 +54,6 @@ class FranchiseUpdateSerializer(serializers.ModelSerializer):
 
         extra_kwargs = {
             'email': {'read_only': True},
-            'is_active': {'read_only': True},
             'username': {'read_only': True}
 
         }
