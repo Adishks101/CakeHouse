@@ -1,6 +1,5 @@
 # serializers.py
 from rest_framework import serializers
-
 from user.models import CustomUser
 from .models import Franchise
 

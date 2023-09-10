@@ -9,16 +9,9 @@ User = get_user_model()
 
 
 class Sales(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     franchise = models.ForeignKey(Franchise, on_delete=models.CASCADE)
-    QUANTITY_TYPE_CHOICES = (
-        ('piece', 'Piece'),
-        ('weight', 'Weight'),
-    )
-    quantity_type = models.CharField(max_length=10, choices=QUANTITY_TYPE_CHOICES, default='weight')
-    quantity_sold = models.PositiveIntegerField()
     PAYMENT_MODE = (
         ('cash', 'Cash'),
         ('bank', 'Bank'),
@@ -31,3 +24,15 @@ class Sales(models.Model):
 
     def __str__(self):
         return f"Sale of {self.product.name} by {self.user.username}"
+
+
+class SaleItem(models.Model):
+    sales = models.ForeignKey(Sales, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    QUANTITY_TYPE_CHOICES = (
+        ('piece', 'Piece'),
+        ('weight', 'Weight'),
+    )
+    quantity_type = models.CharField(max_length=10, choices=QUANTITY_TYPE_CHOICES, default='weight')

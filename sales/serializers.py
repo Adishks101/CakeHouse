@@ -7,19 +7,24 @@ from franchise.serializers import FranchiseSerializer
 from product.models import Product
 from product.serializers import ProductSerializer
 from user.serializers import CustomUserSerializer
-from .models import Sales
+from .models import Sales, SaleItem
+
+
+class SaleItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SaleItem
+        fields = '__all__'
 
 
 class SalesSerializer(serializers.ModelSerializer):
-    product = ProductSerializer()
+    items = SaleItemSerializer(many=True, read_only=True)
     user = CustomUserSerializer()
     customer = CustomerSerializer()
     franchise = FranchiseSerializer()
 
     class Meta:
         model = Sales
-        fields = ('id',
-                  'product', 'customer', 'user', 'franchise', 'quantity_sold', 'quantity_type', 'payment_mode',
+        fields = ('id', 'items', 'customer', 'user', 'franchise', 'payment_mode',
                   'total_amount',
                   'sale_date', 'created_at',
                   'updated_at')
@@ -35,16 +40,10 @@ class SalesCreateSerializer(serializers.Serializer):
         ('cash', 'Cash'),
         ('bank', 'Bank'),
     )
-    QUANTITY_TYPE_CHOICES = (
-        ('weight', 'Weight'),
-        ('piece', 'Piece'),
-    )
+    items = SaleItemSerializer(many=True, read_only=True)
     id = serializers.IntegerField(required=False)
     name = serializers.CharField(max_length=255, required=False)
     phone_number = serializers.CharField(max_length=20, required=True)
-    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=True)
-    quantity_sold = serializers.IntegerField(required=True)
-    quantity_type = serializers.ChoiceField(choices=QUANTITY_TYPE_CHOICES, required=True)
     payment_mode = serializers.ChoiceField(choices=PAYMENT_MODE_CHOICES, required=True)
     total_amount = serializers.IntegerField(required=True)
     extra_kwargs = {
@@ -66,6 +65,12 @@ class SalesCreateSerializer(serializers.Serializer):
         validated_data['user'] = self.context['request'].user
         validated_data['customer'] = customer
 
-        sales = Sales.objects.create(**validated_data)
-
-        return sales
+        try:
+            items_data = validated_data.pop('items')
+            sale = Sales.objects.create(**validated_data)
+            for item_data in items_data:
+                SaleItem.objects.create(sales=sale, **item_data)
+            return sale
+        except Exception as e:
+            error_msg = "Failed to create sale."
+            return {"error_msg": error_msg, "exception": str(e)}

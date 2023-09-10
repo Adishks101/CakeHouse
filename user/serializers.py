@@ -56,8 +56,16 @@ class CustomUserSerializer(serializers.ModelSerializer):
         if CustomUser.objects.filter(phone_number=value).exists():
             raise serializers.ValidationError("Phone number already exists")
         return value
-
-
+    #
+    # def to_representation(self, instance):
+    #     data = super().to_representation(instance)
+    #     if self.errors:
+    #         error_messages = []
+    #         for field, field_errors in self.errors.items():
+    #             for error in field_errors:
+    #                 error_messages.append(f"{field}: {error}")
+    #         data['errors'] = error_messages
+    #     return data
 # user/serializers.py
 
 

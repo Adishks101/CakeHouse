@@ -1,12 +1,13 @@
 from rest_framework.response import Response
-
 from Bakery_Management_System.custom_mixin_response import CustomResponseMixin
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status, filters
+
+from customer.models import Customer
 from inventory.models import Inventory
 from user.permissions import IsAdminUser, IsFranchiseOwner, IsFranchiseUser, IsUser
 from . import serializers
-from .filteras import SalesFilter
+from .filters import SalesFilter
 from .models import Sales
 from .serializers import SalesCreateSerializer, SalesSerializer
 from rest_framework import serializers
@@ -17,7 +18,7 @@ class SalesListView(CustomResponseMixin, generics.ListAPIView):
     serializer_class = SalesSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = SalesFilter
-    search_fields = ['total_amount', 'quantity_sold']
+    search_fields = ['total_amount', 'payment_mode']
     ordering_fields = ['price', 'created_at']
 
     def get_queryset(self):
@@ -57,15 +58,18 @@ class SaleCreateView(CustomResponseMixin, generics.CreateAPIView):
     serializer_class = SalesCreateSerializer
 
     def perform_create(self, serializer):
-        try:
-            inventory = Inventory.objects.get(product=serializer.validated_data['product'],
-                                              franchise=self.request.user.franchise)
-        except Inventory.DoesNotExist:
-            raise serializers.ValidationError({"message":"Product not found in inventory."})
-        if inventory.available_quantity < serializer.validated_data['quantity_sold']:
-            raise serializers.ValidationError({"message": "Insufficient inventory."})
+        items = serializer.validated_data['items']
+        for item in items:
+            try:
+                inventory = Inventory.objects.get(product=item['product'],
+                                                  franchise=self.request.user.franchise)
+            except Inventory.DoesNotExist:
+                raise serializers.ValidationError({"message": "Product not found in inventory."})
+            if inventory.available_quantity < item['quantity_sold']:
+                raise serializers.ValidationError({"message": "Insufficient inventory."})
         sales = serializer.save(franchise=self.request.user.franchise)
-        inventory.update_available_quantity(serializer.validated_data['quantity_sold'])
+        for item in items:
+            inventory.update_available_quantity(item['quantity_sold'])
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
