@@ -8,6 +8,8 @@ class Customer(models.Model):
     email = models.EmailField(blank=True)
     phone_number = models.CharField(max_length=20, blank=False, unique=True)
     pin = models.CharField(max_length=6, blank=True)
+    dob = models.DateField(blank=True, null=True)
+    location = models.CharField(max_length=100, null=True)
     points = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -38,7 +40,6 @@ class Customer(models.Model):
     def update_points(self, points):
         self.points += points
         self.save()
-
 
     def __str__(self):
         return self.phone_number
