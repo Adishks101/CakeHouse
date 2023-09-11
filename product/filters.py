@@ -8,5 +8,4 @@ class ProductFilter(django_filters.FilterSet):
         fields = {
             'name': ['exact', 'icontains'],
             'price': ['exact', 'gte', 'lte'],
-            'quantity': ['exact', 'gte', 'lte'],
         }
