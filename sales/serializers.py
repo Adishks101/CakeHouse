@@ -40,15 +40,16 @@ class SalesCreateSerializer(serializers.Serializer):
         ('cash', 'Cash'),
         ('bank', 'Bank'),
     )
-    items = SaleItemSerializer(many=True, read_only=True)
+    items = SaleItemSerializer(many=True)
     id = serializers.IntegerField(required=False)
-    name = serializers.CharField(max_length=255, required=False)
+    name = serializers.CharField(max_length=255, required=True)
     phone_number = serializers.CharField(max_length=20, required=True)
     payment_mode = serializers.ChoiceField(choices=PAYMENT_MODE_CHOICES, required=True)
     total_amount = serializers.IntegerField(required=True)
     extra_kwargs = {
 
-        'id': {'read_only': True}
+        'id': {'read_only': True},
+        'items': {'required': True}
     }
 
     def create(self, validated_data):
