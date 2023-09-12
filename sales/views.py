@@ -65,11 +65,11 @@ class SaleCreateView(CustomResponseMixin, generics.CreateAPIView):
                                                   franchise=self.request.user.franchise)
             except Inventory.DoesNotExist:
                 raise serializers.ValidationError({"message": "Product not found in inventory."})
-            if inventory.available_quantity < item['quantity_sold']:
+            if inventory.available_quantity < item['quantity']:
                 raise serializers.ValidationError({"message": "Insufficient inventory."})
         sales = serializer.save(franchise=self.request.user.franchise)
         for item in items:
-            inventory.update_available_quantity(item['quantity_sold'])
+            inventory.update_available_quantity(item['quantity'])
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

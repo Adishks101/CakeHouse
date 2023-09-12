@@ -4,8 +4,6 @@ from rest_framework import serializers
 
 from customer.serializers import CustomerSerializer
 from franchise.serializers import FranchiseSerializer
-from product.models import Product
-from product.serializers import ProductSerializer
 from user.serializers import CustomUserSerializer
 from .models import Sales, SaleItem
 
@@ -14,11 +12,14 @@ class SaleItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = SaleItem
         fields = '__all__'
+        extra_kwargs = {
+
+            'sales': {'read_only': True}
+        }
 
 
 class SalesSerializer(serializers.ModelSerializer):
-    items = SaleItemSerializer(many=True, read_only=True)
-    user = CustomUserSerializer()
+    items = SaleItemSerializer(source='saleitem_set', many=True, read_only=True)
     customer = CustomerSerializer()
     franchise = FranchiseSerializer()
 
