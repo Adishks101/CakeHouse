@@ -31,8 +31,3 @@ class SaleItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    QUANTITY_TYPE_CHOICES = (
-        ('piece', 'Piece'),
-        ('weight', 'Weight'),
-    )
-    quantity_type = models.CharField(max_length=10, choices=QUANTITY_TYPE_CHOICES, default='weight')

@@ -4,8 +4,6 @@ from rest_framework import serializers
 
 from customer.serializers import CustomerSerializer
 from franchise.serializers import FranchiseSerializer
-from product.models import Product
-from product.serializers import ProductSerializer
 from user.serializers import CustomUserSerializer
 from .models import Sales, SaleItem
 
@@ -14,11 +12,14 @@ class SaleItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = SaleItem
         fields = '__all__'
+        extra_kwargs = {
+
+            'sales': {'read_only': True}
+        }
 
 
 class SalesSerializer(serializers.ModelSerializer):
-    items = SaleItemSerializer(many=True, read_only=True)
-    user = CustomUserSerializer()
+    items = SaleItemSerializer(source='saleitem_set', many=True, read_only=True)
     customer = CustomerSerializer()
     franchise = FranchiseSerializer()
 
@@ -40,15 +41,16 @@ class SalesCreateSerializer(serializers.Serializer):
         ('cash', 'Cash'),
         ('bank', 'Bank'),
     )
-    items = SaleItemSerializer(many=True, read_only=True)
+    items = SaleItemSerializer(many=True)
     id = serializers.IntegerField(required=False)
-    name = serializers.CharField(max_length=255, required=False)
+    name = serializers.CharField(max_length=255, required=True)
     phone_number = serializers.CharField(max_length=20, required=True)
     payment_mode = serializers.ChoiceField(choices=PAYMENT_MODE_CHOICES, required=True)
     total_amount = serializers.IntegerField(required=True)
     extra_kwargs = {
 
-        'id': {'read_only': True}
+        'id': {'read_only': True},
+        'items': {'required': True}
     }
 
     def create(self, validated_data):
